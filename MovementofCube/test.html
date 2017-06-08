@@ -1,0 +1,143 @@
+<!--Author: Yirong Chen Date: 6/7/2017-->
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>object moves along a path</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <style>
+            body {
+                font-family: Monospace;
+                background-color: #f0f0f0;
+                margin: 0px;
+                overflow: hidden;
+            }
+        </style>
+    </head>
+
+<body>
+
+    <script src="../js/three.js"></script>
+    <script src="../js/tween.js"></script>
+    <script src="../js/dat.gui.js"></script>
+    <script src="../js/stats.min.js"></script>
+    <script src="../js/OrbitControls.js"></script>
+    
+    <script>
+
+    var container, stats;
+    var controls, scene, camera, box, spline, counter = 0;
+
+    var startTime   = Date.now();
+    var tangent = new THREE.Vector3();
+    var axis = new THREE.Vector3();
+    var up = new THREE.Vector3(0, 1, 0);
+
+    init();
+    animate();
+
+    function init() {
+
+        container = document.createElement( 'div' );
+        document.body.appendChild( container );
+
+        var info = document.createElement( 'div' );
+                info.style.position = 'absolute';
+                info.style.top = '10px';
+                info.style.width = '100%';
+                info.style.textAlign = 'right';
+                info.innerHTML = 'object moves along a path';
+                container.appendChild( info );
+
+
+        renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+    
+        camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 5000);
+        camera.position.set(0, 0, 600);
+        camera.lookAt(new THREE.Vector3(0, 100, 0));
+    
+        scene = new THREE.Scene();
+        //controls
+        controls = new THREE.OrbitControls( camera, renderer.domElement );
+
+        
+        //lights
+        var light = new THREE.DirectionalLight( 0xffffff, 0.5 );
+        light.position.set( 1, 1, 1 );
+        scene.add( light );
+        
+
+        var numPoints = 100;
+
+        spline = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(-200, 0, 0),
+        new THREE.Vector3(-100, 100, 0),
+        new THREE.Vector3(100, -100, 0),
+        new THREE.Vector3(200, 0, 0)]);
+
+        //spline.type = 'chordal';
+
+        var material = new THREE.LineBasicMaterial({color: 0xff00f0,});
+        var geometry = new THREE.Geometry();
+        
+        var splinePoints = spline.getPoints(numPoints);
+
+        for (var i = 0; i < splinePoints.length; i++) {
+            geometry.vertices.push(splinePoints[i]);
+        }
+
+        var line = new THREE.Line(geometry, material);
+         scene.add(line);
+
+        geometry = new THREE.BoxGeometry(10,10,10);
+        material = new THREE.MeshStandardMaterial( {
+                        color: new THREE.Color().setHSL( Math.random(), 1, 0.75 ),
+                        roughness: 0.5,
+                        metalness: 0,
+                        shading: THREE.FlatShading
+                    } );
+
+
+        box = new THREE.Mesh(geometry, material);
+        scene.add(box);
+
+        animate();
+
+        setInterval(moveBox, 100);
+    }
+
+    function moveBox() {
+        if (counter <= 1) {
+            box.position.copy( spline.getPointAt(counter) );
+
+            tangent = spline.getTangentAt(counter).normalize();
+
+            axis.crossVectors(up, tangent).normalize();
+
+            var radians = Math.acos(up.dot(tangent));
+
+            box.quaternion.setFromAxisAngle(axis, radians);
+
+            counter += 0.005
+        } else {
+            counter = 0;
+        }
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        render();
+
+    }
+
+    function render() {
+        controls.update();
+        renderer.render(scene, camera);
+    }
+
+    </script>
+</body>
+
+</html>

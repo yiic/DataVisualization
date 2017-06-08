@@ -18,7 +18,6 @@
 
 		<script src="../js/three.js"></script>
 		<script src="../js/stats.min.js"></script>
-		<script src="../js/tween.js"></script>
 		<script src="../js/OrbitControls.js"></script>
 
 		<script>
@@ -98,7 +97,6 @@
 				//mouse control camera
 				controls = new THREE.OrbitControls( camera, renderer.domElement );
 				//controls.addEventListener( 'change', render ); // remove when using animation loop
-
 				// enable animation loop when using damping or autorotation
 				//controls.enableDamping = true;
 				//controls.dampingFactor = 0.25;
@@ -154,8 +152,7 @@
 
 					var intersect = intersects[ 0 ];
 
-					var geometry = new THREE.BoxGeometry( 20, 20, 20 );
-					
+					var geometry = new THREE.BoxGeometry( 20, 20, 20 );		
 					var material = new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff});
 					//material.opacity = 1.0;
 
@@ -165,8 +162,6 @@
 					object.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
 
 					//object.position.x = mouse.x;
-					//object.position.y = mouse.y;
-					//object.position.z = 
 					console.log('Drawing Cube at', mouse.x, mouse.y);
 			
 					object.scale.x = Math.random() * 2 + 1;
@@ -205,14 +200,14 @@
 
 			}
 
-			var radius = 600;
-			var theta = 0;
+			//var radius = 600;
+			//var theta = 0;
 
 			function render() {
 
-				TWEEN.update();
+				//TWEEN.update();
 
-				theta += 0.1;
+				//theta += 0.1;
 				
 				//camera.position.x = radius * Math.sin( THREE.Math.degToRad( theta ) );
 				//camera.position.y = radius * Math.sin( THREE.Math.degToRad( theta ) );
