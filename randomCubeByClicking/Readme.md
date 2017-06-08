@@ -1,6 +1,7 @@
 Random Cube by Clicking
 -----
-**Intro:**
+**Intro:**  
+
 This is a demo for generating cubes with random size, scale and color on a grid by clicking. It has interactive controls: drag to spin and zoom in/out. 
 
 **Sources/Libraries need to be included:**
