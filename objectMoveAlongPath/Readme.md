@@ -1,4 +1,6 @@
 Object Move Along a Path
+
+[**view**](https://yiic.github.io/my-three.js-projects/objectMoveAlongPath/objectMoveAlongPath.html)
 -----
 **Intro:**  
 
