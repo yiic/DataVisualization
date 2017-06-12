@@ -1,4 +1,4 @@
-Object Move Along a Path
+Object Moves Along a Path
 -----
 **Intro:**  
 
