@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Earth Structure</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				margin: 0px;
+				background-color: #000000;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+
+		<script src="../js/three.js"></script>
+		<script src="../js/OrbitControls.js"></script>
+		<script src="../js/stats.min.js"></script>
+		<script src="../js/dat.gui.min.js"></script>
+
+		<script id="fragmentShader" type="x-shader/x-fragment">
+        uniform vec2 u_resolution;
+        uniform float u_time;
+
+        void main() {
+            vec2 st = gl_FragCoord.xy/u_resolution.xy;
+            gl_FragColor=vec4(st.x,st.y,0.0,1.0);
+        }
+    </script>
+		<script>
+
+			var camera, scene, renderer;
+			var group;
+
+			init();
+			animate();
+
+			function init() {
+
+				camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 1, 8000 );
+
+				camera.position.set( -15, 5, 3 );
+				camera.lookAt( new THREE.Vector3( 0, 0, 0) );
+
+				scene = new THREE.Scene();
+
+				// Lights
+				scene.add( new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 ) );
+				scene.add( new THREE.AmbientLight( 0x505050, 1) );
+
+				//var light = new THREE.DirectionalLight(0xffffff, 1);
+					//light.position.set(5,3,5);
+				//scene.add(light);
+
+
+				var clipPlanes = [
+					new THREE.Plane( new THREE.Vector3( 1,  0,  0 ), 0 ),
+					new THREE.Plane( new THREE.Vector3( 0, -1,  0 ), 0 ),
+					new THREE.Plane( new THREE.Vector3( 0,  0, -1 ), 0 )
+				];
+
+				scene.add( new THREE.AmbientLight( 0x505050 ) );
+
+				group = new THREE.Object3D();
+
+				//for ( var i = 1; i < 100; i ++ ) {
+				//////Earth's core 0xffff4d
+				var geometry = new THREE.SphereGeometry( 1, 50, 50 );
+				var material = new THREE.MeshPhongMaterial( {
+						color: new THREE.Color( 0xffff4d ),
+						side: THREE.DoubleSide,
+						clippingPlanes: clipPlanes,
+						clipIntersection: true
+						
+				} );
+				group.add( new THREE.Mesh( geometry, material ) );
+				//}
+
+				//for ( var i = 1; i < 100; i ++ ) {
+				//////Earth's mantle 0xEDA058
+				var geometry = new THREE.SphereGeometry( 1.85, 50, 50 );
+				var material = new THREE.MeshPhongMaterial( {
+						color: new THREE.Color( 0xEDA058 ),
+						side: THREE.DoubleSide,
+						clippingPlanes: clipPlanes,
+						clipIntersection: true
+						
+				} );
+				group.add( new THREE.Mesh( geometry, material ) );
+				//}
+
+				//////water  0x1a8cff
+				var geometry = new THREE.SphereGeometry( 1.9999, 50, 50 );
+				var material = new THREE.MeshPhongMaterial( {
+						color: new THREE.Color( 0x1a8cff ),
+						side: THREE.DoubleSide,
+						clippingPlanes: clipPlanes,
+						clipIntersection: true
+						
+				} );
+				group.add( new THREE.Mesh( geometry, material ) );
+			
+				//////Earth's crust 0x35900
+				var geometry = new THREE.SphereGeometry( 1.97, 50, 50 );
+				var material = new THREE.MeshPhongMaterial( {
+						color: new THREE.Color( 0x35900 ),
+						side: THREE.DoubleSide,
+						clippingPlanes: clipPlanes,
+						clipIntersection: true
+						
+				} );
+				group.add( new THREE.Mesh( geometry, material ) );
+
+				
+				var textureLoader = new THREE.TextureLoader();
+				var texture_earth = textureLoader.load( "earthmap.jpg" );
+				var bump_earth = textureLoader.load("bumpMap.jpg");
+				var galaxy = textureLoader.load("galaxy_starfield.png");
+				//////Earth's surface 0x6666ff 
+				var geometry = new THREE.SphereGeometry( 2.0, 50, 50 );
+				var material = new THREE.MeshPhongMaterial( {
+						map: texture_earth,
+						bumpMap: bump_earth,
+						bumpScale:   0.05,
+						side: THREE.DoubleSide,
+						clippingPlanes: clipPlanes,
+						clipIntersection: true
+						
+				} );
+				group.add( new THREE.Mesh( geometry, material ) );
+
+				
+				/////galaxy
+				var geometry = new THREE.SphereGeometry( 50, 32, 32 );
+				var material = new THREE.MeshPhongMaterial( {
+						map: galaxy,	
+						side: THREE.BackSide,
+						clippingPlanes: clipPlanes,
+						clipIntersection: true
+				} );
+				group.add( new THREE.Mesh( geometry, material ) );
+				
+				
+			
+				scene.add( group );
+			
+
+
+
+				// RENDERER
+				var container = document.body;
+
+				renderer = new THREE.WebGLRenderer();
+				renderer.antialias = true;
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.setClearColor( 0x222222 );
+				renderer.localClippingEnabled = true;
+
+				window.addEventListener( 'resize', onWindowResize, false );
+				container.appendChild( renderer.domElement );
+
+				// Stats
+				stats = new Stats();
+				container.appendChild( stats.dom );
+
+				// GUI
+				mode = {};
+				mode.clipIntersection = true;
+				mode.clipPosition = 0;
+
+				var gui = new dat.GUI();
+				gui.add( mode, 'clipIntersection' ).onChange( function () {
+
+					var children = group.children;
+
+					for ( var i = 0; i < children.length; i ++ ) {
+
+						var child = children[ i ];
+						child.material.clipIntersection = ! child.material.clipIntersection;
+
+					}
+
+				} );
+				gui.add( mode, 'clipPosition', -16, 16 );
+
+				// Controls
+				var controls = new THREE.OrbitControls( camera, renderer.domElement );
+				controls.target.set( 0, 1, 0 );
+				controls.update();
+
+				// Start
+				startTime = Date.now();
+				time = 0;
+
+			}
+
+			function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				var children = group.children;
+
+				for ( var i = 0; i < children.length; i ++ ) {
+
+					var current = children[ i ].material;
+
+					for ( var j = 0; j < current.clippingPlanes.length; j ++ ) {
+
+						var plane = current.clippingPlanes[ j ];
+						plane.constant = ( 49 * plane.constant + mode.clipPosition ) / 50;
+
+					}
+
+				}
+
+				stats.begin();
+				renderer.render( scene, camera );
+				stats.end();
+
+			}
+
+		</script>
+
+	</body>
+</html>
