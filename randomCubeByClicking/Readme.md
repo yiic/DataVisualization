@@ -2,7 +2,7 @@ Random Cube by Clicking
 -----
 **Intro:**  
 
-This is a demo for generating cubes with random size, scale and color on a grid by clicking. It has interactive controls: drag to spin and zoom in/out. 
+This is a demo for generating cubes with random size, scale and color on a grid by clicking. It has interactive controls: drag to spin and zoom in/out. ([view this demo](https://yiic.github.io/my-three.js-projects/randomCubeByClicking/randomCubebyClicking.html))
 
 **Sources/Libraries need to be included:**
 - three.js
@@ -14,7 +14,3 @@ This is a demo for generating cubes with random size, scale and color on a grid 
 - [Interactive/cubes](https://threejs.org/examples/#canvas_interactive_cubes)
 - [Interactive/cubes/tween](https://threejs.org/examples/#canvas_interactive_cubes_tween)
 - [Interactive/voxelpainter](https://threejs.org/examples/#canvas_interactive_voxelpainter) 
-
-
-
-

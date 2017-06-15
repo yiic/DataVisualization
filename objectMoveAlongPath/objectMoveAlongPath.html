@@ -58,11 +58,13 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
     
+    
         camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 5000);
         camera.position.set(0, 0, 600);
         camera.lookAt(new THREE.Vector3(0, 100, 0));
     
         scene = new THREE.Scene();
+     
         //controls
         controls = new THREE.OrbitControls( camera, renderer.domElement );
 
@@ -85,10 +87,12 @@
 
         //spline.type = 'chordal';
 
+
         var material = new THREE.LineBasicMaterial();
         var geometry = new THREE.Geometry();
         
         var splinePoints = spline.getPoints(numPoints);
+
 
         for (var i = 0; i < splinePoints.length; i++) {
             geometry.vertices.push(splinePoints[i]);
@@ -97,11 +101,13 @@
         var line = new THREE.Line(geometry, material);
          scene.add(line);
 
+
         geometry = geometries[ geometries.length * Math.random() | 0 ];
         material = new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff});
 
         box = new THREE.Mesh(geometry, material);
         scene.add(box);
+
 
         animate();
 
