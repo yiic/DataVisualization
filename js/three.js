@@ -738,7 +738,7 @@
 
 		clamp: function ( min, max ) {
 
-			// This function assumes min < max, if this assumption isn't true it will not operate correctly
+			// assumes min < max, componentwise
 
 			this.x = Math.max( min.x, Math.min( max.x, this.x ) );
 			this.y = Math.max( min.y, Math.min( max.y, this.y ) );
@@ -767,7 +767,7 @@
 
 			var length = this.length();
 
-			return this.multiplyScalar( Math.max( min, Math.min( max, length ) ) / length );
+			return this.divideScalar( length || 1 ).multiplyScalar( Math.max( min, Math.min( max, length ) ) );
 
 		},
 
@@ -842,7 +842,7 @@
 
 		normalize: function () {
 
-			return this.divideScalar( this.length() );
+			return this.divideScalar( this.length() || 1 );
 
 		},
 
@@ -879,7 +879,7 @@
 
 		setLength: function ( length ) {
 
-			return this.multiplyScalar( length / this.length() );
+			return this.normalize().multiplyScalar( length );
 
 		},
 
@@ -1670,7 +1670,7 @@
 
 		clamp: function ( min, max ) {
 
-			// This function assumes min < max, if this assumption isn't true it will not operate correctly
+			// assumes min < max, componentwise
 
 			this.x = Math.max( min.x, Math.min( max.x, this.x ) );
 			this.y = Math.max( min.y, Math.min( max.y, this.y ) );
@@ -1683,10 +1683,16 @@
 
 		clampScalar: function () {
 
-			var min = new Vector4();
-			var max = new Vector4();
+			var min, max;
 
 			return function clampScalar( minVal, maxVal ) {
+
+				if ( min === undefined ) {
+
+					min = new Vector4();
+					max = new Vector4();
+
+				}
 
 				min.set( minVal, minVal, minVal, minVal );
 				max.set( maxVal, maxVal, maxVal, maxVal );
@@ -1696,6 +1702,14 @@
 			};
 
 		}(),
+
+		clampLength: function ( min, max ) {
+
+			var length = this.length();
+
+			return this.divideScalar( length || 1 ).multiplyScalar( Math.max( min, Math.min( max, length ) ) );
+
+		},
 
 		floor: function () {
 
@@ -1778,13 +1792,13 @@
 
 		normalize: function () {
 
-			return this.divideScalar( this.length() );
+			return this.divideScalar( this.length() || 1 );
 
 		},
 
 		setLength: function ( length ) {
 
-			return this.multiplyScalar( length / this.length() );
+			return this.normalize().multiplyScalar( length );
 
 		},
 
@@ -2845,12 +2859,13 @@
 			var x = this.x, y = this.y, z = this.z;
 			var e = m.elements;
 
-			this.x = e[ 0 ] * x + e[ 4 ] * y + e[ 8 ]  * z + e[ 12 ];
-			this.y = e[ 1 ] * x + e[ 5 ] * y + e[ 9 ]  * z + e[ 13 ];
-			this.z = e[ 2 ] * x + e[ 6 ] * y + e[ 10 ] * z + e[ 14 ];
-			var w =  e[ 3 ] * x + e[ 7 ] * y + e[ 11 ] * z + e[ 15 ];
+			var w = 1 / ( e[ 3 ] * x + e[ 7 ] * y + e[ 11 ] * z + e[ 15 ] );
 
-			return this.divideScalar( w );
+			this.x = ( e[ 0 ] * x + e[ 4 ] * y + e[ 8 ]  * z + e[ 12 ] ) * w;
+			this.y = ( e[ 1 ] * x + e[ 5 ] * y + e[ 9 ]  * z + e[ 13 ] ) * w;
+			this.z = ( e[ 2 ] * x + e[ 6 ] * y + e[ 10 ] * z + e[ 14 ] ) * w;
+
+			return this;
 
 		},
 
@@ -2956,7 +2971,7 @@
 
 		clamp: function ( min, max ) {
 
-			// This function assumes min < max, if this assumption isn't true it will not operate correctly
+			// assumes min < max, componentwise
 
 			this.x = Math.max( min.x, Math.min( max.x, this.x ) );
 			this.y = Math.max( min.y, Math.min( max.y, this.y ) );
@@ -2986,7 +3001,7 @@
 
 			var length = this.length();
 
-			return this.multiplyScalar( Math.max( min, Math.min( max, length ) ) / length );
+			return this.divideScalar( length || 1 ).multiplyScalar( Math.max( min, Math.min( max, length ) ) );
 
 		},
 
@@ -3068,13 +3083,13 @@
 
 		normalize: function () {
 
-			return this.divideScalar( this.length() );
+			return this.divideScalar( this.length() || 1 );
 
 		},
 
 		setLength: function ( length ) {
 
-			return this.multiplyScalar( length / this.length() );
+			return this.normalize().multiplyScalar( length );
 
 		},
 
@@ -3217,7 +3232,13 @@
 
 		setFromMatrixPosition: function ( m ) {
 
-			return this.setFromMatrixColumn( m, 3 );
+			var e = m.elements;
+
+			this.x = e[ 12 ];
+			this.y = e[ 13 ];
+			this.z = e[ 14 ];
+
+			return this;
 
 		},
 
@@ -3236,7 +3257,6 @@
 		},
 
 		setFromMatrixColumn: function ( m, index ) {
-
 
 			return this.fromArray( m.elements, index * 4 );
 
@@ -3631,9 +3651,19 @@
 
 				if ( x.lengthSq() === 0 ) {
 
-					// eye and target are in the same vertical
+					// up and z are parallel
 
-					z.z += 0.0001;
+					if ( Math.abs( up.z ) === 1 ) {
+
+						z.x += 0.0001;
+
+					} else {
+
+						z.z += 0.0001;
+
+					}
+
+					z.normalize();
 					x.crossVectors( up, z );
 
 				}
@@ -5772,7 +5802,7 @@
 
 	var meshlambert_vert = "#define LAMBERT\nvarying vec3 vLightFront;\n#ifdef DOUBLE_SIDED\n\tvarying vec3 vLightBack;\n#endif\n#include <common>\n#include <uv_pars_vertex>\n#include <uv2_pars_vertex>\n#include <envmap_pars_vertex>\n#include <bsdfs>\n#include <lights_pars>\n#include <color_pars_vertex>\n#include <fog_pars_vertex>\n#include <morphtarget_pars_vertex>\n#include <skinning_pars_vertex>\n#include <shadowmap_pars_vertex>\n#include <logdepthbuf_pars_vertex>\n#include <clipping_planes_pars_vertex>\nvoid main() {\n\t#include <uv_vertex>\n\t#include <uv2_vertex>\n\t#include <color_vertex>\n\t#include <beginnormal_vertex>\n\t#include <morphnormal_vertex>\n\t#include <skinbase_vertex>\n\t#include <skinnormal_vertex>\n\t#include <defaultnormal_vertex>\n\t#include <begin_vertex>\n\t#include <morphtarget_vertex>\n\t#include <skinning_vertex>\n\t#include <project_vertex>\n\t#include <logdepthbuf_vertex>\n\t#include <clipping_planes_vertex>\n\t#include <worldpos_vertex>\n\t#include <envmap_vertex>\n\t#include <lights_lambert_vertex>\n\t#include <shadowmap_vertex>\n\t#include <fog_vertex>\n}\n";
 
-	var meshphong_frag = "#define PHONG\nuniform vec3 diffuse;\nuniform vec3 emissive;\nuniform vec3 specular;\nuniform float shininess;\nuniform float opacity;\n#include <common>\n#include <packing>\n#include <dithering_pars_fragment>\n#include <color_pars_fragment>\n#include <uv_pars_fragment>\n#include <uv2_pars_fragment>\n#include <map_pars_fragment>\n#include <alphamap_pars_fragment>\n#include <aomap_pars_fragment>\n#include <lightmap_pars_fragment>\n#include <emissivemap_pars_fragment>\n#include <envmap_pars_fragment>\n#include <gradientmap_pars_fragment>\n#include <fog_pars_fragment>\n#include <bsdfs>\n#include <lights_pars>\n#include <lights_phong_pars_fragment>\n#include <shadowmap_pars_fragment>\n#include <bumpmap_pars_fragment>\n#include <normalmap_pars_fragment>\n#include <specularmap_pars_fragment>\n#include <logdepthbuf_pars_fragment>\n#include <clipping_planes_pars_fragment>\nvoid main() {\n\t#include <clipping_planes_fragment>\n\tvec4 diffuseColor = vec4( diffuse, opacity );\n\tReflectedLight reflectedLight = ReflectedLight( vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ) );\n\tvec3 totalEmissiveRadiance = emissive;\n\t#include <logdepthbuf_fragment>\n\t#include <map_fragment>\n\t#include <color_fragment>\n\t#include <alphamap_fragment>\n\t#include <alphatest_fragment>\n\t#include <specularmap_fragment>\n\t#include <normal_flip>\n\t#include <normal_fragment>\n\t#include <emissivemap_fragment>\n\t#include <lights_phong_fragment>\n\t#include <lights_template>\n\t#include <aomap_fragment>\n\tvec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse + reflectedLight.directSpecular + reflectedLight.indirectSpecular + totalEmissiveRadiance;\n\t#include <envmap_fragment>\n\tif ( gl_FrontFacing ) {\n    gl_FragColor = vec4( outgoingLight, diffuseColor.a );\n} else {\n    gl_FragColor = diffuseColor;\n}\n\t#include <tonemapping_fragment>\n\t#include <encodings_fragment>\n\t#include <fog_fragment>\n\t#include <premultiplied_alpha_fragment>\n\t#include <dithering_fragment>\n}\n";
+	var meshphong_frag = "#define PHONG\nuniform vec3 diffuse;\nuniform vec3 emissive;\nuniform vec3 specular;\nuniform float shininess;\nuniform float opacity;\n#include <common>\n#include <packing>\n#include <dithering_pars_fragment>\n#include <color_pars_fragment>\n#include <uv_pars_fragment>\n#include <uv2_pars_fragment>\n#include <map_pars_fragment>\n#include <alphamap_pars_fragment>\n#include <aomap_pars_fragment>\n#include <lightmap_pars_fragment>\n#include <emissivemap_pars_fragment>\n#include <envmap_pars_fragment>\n#include <gradientmap_pars_fragment>\n#include <fog_pars_fragment>\n#include <bsdfs>\n#include <lights_pars>\n#include <lights_phong_pars_fragment>\n#include <shadowmap_pars_fragment>\n#include <bumpmap_pars_fragment>\n#include <normalmap_pars_fragment>\n#include <specularmap_pars_fragment>\n#include <logdepthbuf_pars_fragment>\n#include <clipping_planes_pars_fragment>\nvoid main() {\n\t#include <clipping_planes_fragment>\n\tvec4 diffuseColor = vec4( diffuse, opacity );\n\tReflectedLight reflectedLight = ReflectedLight( vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ) );\n\tvec3 totalEmissiveRadiance = emissive;\n\t#include <logdepthbuf_fragment>\n\t#include <map_fragment>\n\t#include <color_fragment>\n\t#include <alphamap_fragment>\n\t#include <alphatest_fragment>\n\t#include <specularmap_fragment>\n\t#include <normal_flip>\n\t#include <normal_fragment>\n\t#include <emissivemap_fragment>\n\t#include <lights_phong_fragment>\n\t#include <lights_template>\n\t#include <aomap_fragment>\n\tvec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse + reflectedLight.directSpecular + reflectedLight.indirectSpecular + totalEmissiveRadiance;\n\t#include <envmap_fragment>\n\tgl_FragColor = vec4( outgoingLight, diffuseColor.a );\n\t#include <tonemapping_fragment>\n\t#include <encodings_fragment>\n\t#include <fog_fragment>\n\t#include <premultiplied_alpha_fragment>\n\t#include <dithering_fragment>\n}\n";
 
 	var meshphong_vert = "#define PHONG\nvarying vec3 vViewPosition;\n#ifndef FLAT_SHADED\n\tvarying vec3 vNormal;\n#endif\n#include <common>\n#include <uv_pars_vertex>\n#include <uv2_pars_vertex>\n#include <displacementmap_pars_vertex>\n#include <envmap_pars_vertex>\n#include <color_pars_vertex>\n#include <fog_pars_vertex>\n#include <morphtarget_pars_vertex>\n#include <skinning_pars_vertex>\n#include <shadowmap_pars_vertex>\n#include <logdepthbuf_pars_vertex>\n#include <clipping_planes_pars_vertex>\nvoid main() {\n\t#include <uv_vertex>\n\t#include <uv2_vertex>\n\t#include <color_vertex>\n\t#include <beginnormal_vertex>\n\t#include <morphnormal_vertex>\n\t#include <skinbase_vertex>\n\t#include <skinnormal_vertex>\n\t#include <defaultnormal_vertex>\n#ifndef FLAT_SHADED\n\tvNormal = normalize( transformedNormal );\n#endif\n\t#include <begin_vertex>\n\t#include <displacementmap_vertex>\n\t#include <morphtarget_vertex>\n\t#include <skinning_vertex>\n\t#include <project_vertex>\n\t#include <logdepthbuf_vertex>\n\t#include <clipping_planes_vertex>\n\tvViewPosition = - mvPosition.xyz;\n\t#include <worldpos_vertex>\n\t#include <envmap_vertex>\n\t#include <shadowmap_vertex>\n\t#include <fog_vertex>\n}\n";
 
@@ -16096,7 +16126,7 @@
 				gl.bufferSubData( bufferType, updateRange.offset * array.BYTES_PER_ELEMENT,
 					array.subarray( updateRange.offset, updateRange.offset + updateRange.count ) );
 
-				updateRange.count = 0; // reset range
+				updateRange.count = -1; // reset range
 
 			}
 
@@ -18284,7 +18314,7 @@
 					// (https://www.khronos.org/registry/webgl/extensions/WEBGL_depth_texture/)
 					if ( texture.type !== UnsignedInt248Type ) {
 
-					        console.warn( 'THREE.WebGLRenderer: Use UnsignedInt248Type for DepthStencilFormat DepthTexture.' );
+						console.warn( 'THREE.WebGLRenderer: Use UnsignedInt248Type for DepthStencilFormat DepthTexture.' );
 
 						texture.type = UnsignedInt248Type;
 						glType = paramThreeToGL( texture.type );
@@ -19688,6 +19718,223 @@
 	 * @author mrdoob / http://mrdoob.com/
 	 */
 
+	function ArrayCamera( array ) {
+
+		PerspectiveCamera.call( this );
+
+		this.cameras = array || [];
+
+	}
+
+	ArrayCamera.prototype = Object.assign( Object.create( PerspectiveCamera.prototype ), {
+
+		constructor: ArrayCamera,
+
+		isArrayCamera: true
+
+	} );
+
+	/**
+	 * @author mrdoob / http://mrdoob.com/
+	 */
+
+	function WebVRManager( renderer ) {
+
+		var scope = this;
+
+		var device = null;
+		var frameData = null;
+
+		if ( 'VRFrameData' in window ) {
+
+			frameData = new window.VRFrameData();
+
+		}
+
+		var matrixWorldInverse = new Matrix4();
+
+		var standingMatrix = new Matrix4();
+		var standingMatrixInverse = new Matrix4();
+
+		var cameraL = new PerspectiveCamera();
+		cameraL.bounds = new Vector4( 0.0, 0.0, 0.5, 1.0 );
+		cameraL.layers.enable( 1 );
+
+		var cameraR = new PerspectiveCamera();
+		cameraR.bounds = new Vector4( 0.5, 0.0, 0.5, 1.0 );
+		cameraR.layers.enable( 2 );
+
+		var cameraVR = new ArrayCamera( [ cameraL, cameraR ] );
+
+		//
+
+		var currentSize, currentPixelRatio;
+
+		function onVRDisplayPresentChange() {
+
+			if ( device.isPresenting ) {
+
+				var eyeParameters = device.getEyeParameters( 'left' );
+				var renderWidth = eyeParameters.renderWidth;
+				var renderHeight = eyeParameters.renderHeight;
+
+				currentPixelRatio = renderer.getPixelRatio();
+				currentSize = renderer.getSize();
+
+				renderer.setPixelRatio( 1 );
+				renderer.setSize( renderWidth * 2, renderHeight, false );
+
+			} else if ( scope.enabled ) {
+
+				renderer.setPixelRatio( currentPixelRatio );
+				renderer.setSize( currentSize.width, currentSize.height, true );
+
+			}
+
+		}
+
+		window.addEventListener( 'vrdisplaypresentchange', onVRDisplayPresentChange, false );
+
+		//
+
+		this.enabled = false;
+		this.standing = false;
+
+		this.getDevice = function () {
+
+			return device;
+
+		};
+
+		this.setDevice = function ( value ) {
+
+			if ( value !== undefined ) device = value;
+
+		};
+
+		this.getCamera = function ( camera ) {
+
+			if ( device === null ) return camera;
+
+			device.depthNear = camera.near;
+			device.depthFar = camera.far;
+
+			device.getFrameData( frameData );
+
+			//
+
+			var pose = frameData.pose;
+
+			if ( pose.position !== null ) {
+
+				camera.position.fromArray( pose.position );
+
+			} else {
+
+				camera.position.set( 0, 0, 0 );
+
+			}
+
+			if ( pose.orientation !== null ) {
+
+				camera.quaternion.fromArray( pose.orientation );
+
+			}
+
+			camera.updateMatrixWorld();
+
+			var stageParameters = device.stageParameters;
+
+			if ( this.standing && stageParameters ) {
+
+				standingMatrix.fromArray( stageParameters.sittingToStandingTransform );
+				standingMatrixInverse.getInverse( standingMatrix );
+
+				camera.matrixWorld.multiply( standingMatrix );
+				camera.matrixWorldInverse.multiply( standingMatrixInverse );
+
+			}
+
+			if ( device.isPresenting === false ) return camera;
+
+			//
+
+			cameraVR.matrixWorld.copy( camera.matrixWorld );
+			cameraVR.matrixWorldInverse.copy( camera.matrixWorldInverse );
+
+			cameraL.matrixWorldInverse.fromArray( frameData.leftViewMatrix );
+			cameraR.matrixWorldInverse.fromArray( frameData.rightViewMatrix );
+
+			if ( this.standing && stageParameters ) {
+
+				cameraL.matrixWorldInverse.multiply( standingMatrixInverse );
+				cameraR.matrixWorldInverse.multiply( standingMatrixInverse );
+
+			}
+
+			var parent = camera.parent;
+
+			if ( parent !== null ) {
+
+				matrixWorldInverse.getInverse( parent.matrixWorld );
+
+				cameraL.matrixWorldInverse.multiply( matrixWorldInverse );
+				cameraR.matrixWorldInverse.multiply( matrixWorldInverse );
+
+			}
+
+			cameraL.projectionMatrix.fromArray( frameData.leftProjectionMatrix );
+			cameraR.projectionMatrix.fromArray( frameData.rightProjectionMatrix );
+
+			// HACK @mrdoob
+			// https://github.com/w3c/webvr/issues/203
+
+			cameraVR.projectionMatrix.copy( cameraL.projectionMatrix );
+
+			//
+
+			var layers = device.getLayers();
+
+			if ( layers.length ) {
+
+				var layer = layers[ 0 ];
+
+				if ( layer.leftBounds !== null && layer.leftBounds.length === 4 ) {
+
+					cameraL.bounds.fromArray( layer.leftBounds );
+
+				}
+
+				if ( layer.rightBounds !== null && layer.rightBounds.length === 4 ) {
+
+					cameraR.bounds.fromArray( layer.rightBounds );
+
+				}
+
+			}
+
+			return cameraVR;
+
+		};
+
+		this.getStandingMatrix = function () {
+
+			return standingMatrix;
+
+		};
+
+		this.submitFrame = function () {
+
+			if ( device && device.isPresenting ) device.submitFrame();
+
+		};
+
+	}
+
+	/**
+	 * @author mrdoob / http://mrdoob.com/
+	 */
+
 	function WebGLExtensions( gl ) {
 
 		var extensions = {};
@@ -20166,6 +20413,7 @@
 		var programCache = new WebGLPrograms( this, capabilities );
 		var lightCache = new WebGLLights();
 		var renderLists = new WebGLRenderLists();
+		var vr = new WebVRManager( this );
 
 		this.info.programs = programCache.programs;
 
@@ -20216,6 +20464,7 @@
 		this.properties = properties;
 		this.renderLists = renderLists;
 		this.state = state;
+		this.vr = vr;
 
 		// shadow map
 
@@ -20953,6 +21202,20 @@
 
 		// Rendering
 
+		this.animate = function ( callback ) {
+
+			function onFrame() {
+
+				callback();
+
+				( vr.getDevice() || window ).requestAnimationFrame( onFrame );
+
+			}
+
+			( vr.getDevice() || window ).requestAnimationFrame( onFrame );
+
+		};
+
 		this.render = function ( scene, camera, renderTarget, forceClear ) {
 
 			if ( ! ( camera && camera.isCamera ) ) {
@@ -20974,9 +21237,13 @@
 
 			// update camera matrices and frustum
 
-			camera.onBeforeRender( _this );
-
 			if ( camera.parent === null ) camera.updateMatrixWorld();
+
+			if ( vr.enabled ) {
+
+				camera = vr.getCamera( camera );
+
+			}
 
 			_projScreenMatrix.multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse );
 			_frustum.setFromMatrix( _projScreenMatrix );
@@ -21105,27 +21372,33 @@
 
 			}
 
-			//
+			// render scene
 
-			var opaqueObjects = currentRenderList.opaque;
-			var transparentObjects = currentRenderList.transparent;
+			if ( camera.isArrayCamera ) {
 
-			if ( scene.overrideMaterial ) {
+				var cameras = camera.cameras;
 
-				var overrideMaterial = scene.overrideMaterial;
+				for ( var j = 0, jl = cameras.length; j < jl; j ++ ) {
 
-				if ( opaqueObjects.length ) renderObjects( opaqueObjects, scene, camera, overrideMaterial );
-				if ( transparentObjects.length ) renderObjects( transparentObjects, scene, camera, overrideMaterial );
+					var camera2 = cameras[ j ];
+					var bounds = camera2.bounds;
+
+					var x = bounds.x * _width;
+					var y = bounds.y * _height;
+					var width = bounds.z * _width;
+					var height = bounds.w * _height;
+
+					_this.setViewport( x, y, width, height );
+					_this.setScissor( x, y, width, height );
+					_this.setScissorTest( true );
+
+					renderScene( currentRenderList, scene, camera2 );
+
+				}
 
 			} else {
 
-				// opaque pass (front-to-back order)
-
-				if ( opaqueObjects.length ) renderObjects( opaqueObjects, scene, camera );
-
-				// transparent pass (back-to-front order)
-
-				if ( transparentObjects.length ) renderObjects( transparentObjects, scene, camera );
+				renderScene( currentRenderList, scene, camera );
 
 			}
 
@@ -21154,7 +21427,11 @@
 
 			}
 
-			camera.onAfterRender( _this );
+			if ( vr.enabled ) {
+
+				vr.submitFrame();
+
+			}
 
 			// _gl.finish();
 
@@ -21309,11 +21586,37 @@
 
 		}
 
-		function renderObjects( renderList, scene, camera, overrideMaterial ) {
+		function renderScene( renderList, scene, camera ) {
 
-			for ( var i = 0, l = renderList.length; i < l; i ++ ) {
+			var opaqueObjects = renderList.opaque;
+			var transparentObjects = renderList.transparent;
 
-				var renderItem = renderList[ i ];
+			if ( scene.overrideMaterial ) {
+
+				var overrideMaterial = scene.overrideMaterial;
+
+				if ( opaqueObjects.length ) renderObjects( opaqueObjects, scene, camera, overrideMaterial );
+				if ( transparentObjects.length ) renderObjects( transparentObjects, scene, camera, overrideMaterial );
+
+			} else {
+
+				// opaque pass (front-to-back order)
+
+				if ( opaqueObjects.length ) renderObjects( opaqueObjects, scene, camera );
+
+				// transparent pass (back-to-front order)
+
+				if ( transparentObjects.length ) renderObjects( transparentObjects, scene, camera );
+
+			}
+
+		}
+
+		function renderObjects( renderItems, scene, camera, overrideMaterial ) {
+
+			for ( var i = 0, l = renderItems.length; i < l; i ++ ) {
+
+				var renderItem = renderItems[ i ];
 
 				var object = renderItem.object;
 				var geometry = renderItem.geometry;
@@ -21322,33 +21625,7 @@
 
 				object.onBeforeRender( _this, scene, camera, geometry, material, group );
 
-				if ( camera.isArrayCamera ) {
-
-					var cameras = camera.cameras;
-
-					for ( var j = 0, jl = cameras.length; j < jl; j ++ ) {
-
-						var camera2 = cameras[ j ];
-						var bounds = camera2.bounds;
-
-						var x = bounds.x * _width;
-						var y = bounds.y * _height;
-						var width = bounds.z * _width;
-						var height = bounds.w * _height;
-
-						_this.setViewport( x, y, width, height );
-						_this.setScissor( x, y, width, height );
-						_this.setScissorTest( true );
-
-						renderObject( object, scene, camera2, geometry, material, group );
-
-					}
-
-				} else {
-
-					renderObject( object, scene, camera, geometry, material, group );
-
-				}
+				renderObject( object, scene, camera, geometry, material, group );
 
 				object.onAfterRender( _this, scene, camera, geometry, material, group );
 
@@ -35993,26 +36270,6 @@
 
 	CubeCamera.prototype = Object.create( Object3D.prototype );
 	CubeCamera.prototype.constructor = CubeCamera;
-
-	/**
-	 * @author mrdoob / http://mrdoob.com/
-	 */
-
-	function ArrayCamera( array ) {
-
-		PerspectiveCamera.call( this );
-
-		this.cameras = array || [];
-
-	}
-
-	ArrayCamera.prototype = Object.assign( Object.create( PerspectiveCamera.prototype ), {
-
-		constructor: ArrayCamera,
-
-		isArrayCamera: true
-
-	} );
 
 	/**
 	 * @author mrdoob / http://mrdoob.com/
