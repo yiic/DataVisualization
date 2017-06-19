@@ -19,11 +19,13 @@
 		<script src="../js/OrbitControls.js"></script>
 		<script src="../js/stats.min.js"></script>
 		<script src="../js/ThreeCSG.js"></script>
+		<script src="../js/dat.gui.js"></script>
 
 		<script>
 
 			var camera, scene, renderer;
 			var group;
+			var axis;
 
 			init();
 			animate();
@@ -61,8 +63,8 @@
 				scene.add( new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 ) );
 				scene.add( new THREE.AmbientLight( 0x505050 ) );
 
-				var light = new THREE.DirectionalLight(0xffffff, 0.1);
-					light.position.set(5,3,5);
+				var light = new THREE.DirectionalLight(0xffffff, 0.2);
+					light.position.set(5,15,30);
 				scene.add(light);
 
 
@@ -88,7 +90,7 @@
 
 
 				//******************************************************** Inner core
-				var geometry = new THREE.SphereGeometry( 0.22, 32, 32 ); // Take more time to load when increase the last two indexs.
+				var geometry = new THREE.SphereGeometry( 0.25, 40, 40 ); // Take more time to load when increase the last two indexs.
 				var incore_mesh = new THREE.Mesh( geometry );
 				var incore_bsp = new ThreeBSP(incore_mesh);
 
@@ -96,7 +98,7 @@
 
 				var incore_result = incore_bsp.toMesh(new THREE.MeshLambertMaterial({
 					shading: THREE.SmoothShading,
-					color: new THREE.Color( 0xffffcc )
+					color: new THREE.Color( 0xffffb3)
 				}));
 
 				scene.add(incore_result);
@@ -104,7 +106,7 @@
 
 
 				//******************************************************** Outer core
-				var geometry = new THREE.SphereGeometry( 0.5, 24, 24 ); // Take more time to load when increase the last two indexs.
+				var geometry = new THREE.SphereGeometry( 0.55, 24, 24 ); // Take more time to load when increase the last two indexs.
 				var core_mesh = new THREE.Mesh( geometry );
 				var core_bsp = new ThreeBSP(core_mesh);
 
@@ -184,6 +186,8 @@
 				scene.add( new THREE.Mesh( geometry, material ) );
 
 
+				
+
 				// RENDERER
 				var container = document.body;
 
@@ -211,7 +215,37 @@
 				startTime = Date.now();
 				time = 0;
 
+				//Axis
+				axis = new THREE.AxisHelper(2);
+
+				axisControl();
+
 			}
+
+
+
+			// GUI
+			function axisControl(){
+
+				var gui = new dat.GUI();
+				var value;
+
+				param = {
+					show: false,
+				};
+
+				var showAxis = gui.add(param, "show").name("Show Axis Lines").onChange(function(jar){
+					if (jar) {
+						scene.add(axis);
+					}else{
+						scene.remove(axis);
+					}
+					
+				});
+
+				gui.open();
+			}
+
 
 			function onWindowResize() {
 

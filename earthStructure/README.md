@@ -10,3 +10,4 @@ This is a demo showing the structure of the earth.
 - stats.min.js
 - OrbitControls.js
 - ThreeCSG.js
+- dat.gui.js
