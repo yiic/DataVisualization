@@ -63,9 +63,22 @@
 				scene.add( new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 ) );
 				scene.add( new THREE.AmbientLight( 0x505050 ) );
 
-				var light = new THREE.DirectionalLight(0xffffff, 0.2);
-					light.position.set(5,15,30);
-				scene.add(light);
+				var light1 = new THREE.DirectionalLight(0xffffff, 0.2);
+					light1.position.set(5,15,30);
+				scene.add(light1);
+
+				/*
+				//spotlight is used for creating shadows
+				var light2 = new THREE.SpotLight( 0xffffff, 0.1 );
+				light2.position.set( 100, 500, 1000 );
+				light2.castShadow = true;
+				light2.shadow = new THREE.LightShadow( new THREE.PerspectiveCamera( 50, 1, 200, 10000 ) );
+				light2.shadow.bias = - 0.00022;
+				light2.shadow.mapSize.width = 2048;
+				light2.shadow.mapSize.height = 2048;
+				scene.add( light2 );
+				*/
+
 
 
 				group = new THREE.Object3D();
@@ -90,7 +103,7 @@
 
 
 				//******************************************************** Inner core
-				var geometry = new THREE.SphereGeometry( 0.25, 40, 40 ); // Take more time to load when increase the last two indexs.
+				var geometry = new THREE.SphereGeometry( 0.25, 32, 32 ); // Take more time to load when increase the last two indexs.
 				var incore_mesh = new THREE.Mesh( geometry );
 				var incore_bsp = new ThreeBSP(incore_mesh);
 
@@ -224,7 +237,7 @@
 
 
 
-			// GUI
+			// GUI Control to show axis
 			function axisControl(){
 
 				var gui = new dat.GUI();
@@ -235,6 +248,7 @@
 				};
 
 				var showAxis = gui.add(param, "show").name("Show Axis Lines").onChange(function(jar){
+
 					if (jar) {
 						scene.add(axis);
 					}else{
@@ -247,6 +261,7 @@
 			}
 
 
+
 			function onWindowResize() {
 
 				camera.aspect = window.innerWidth / window.innerHeight;
@@ -255,6 +270,8 @@
 				renderer.setSize( window.innerWidth, window.innerHeight );
 
 			}
+
+
 
 			function animate() {
 
