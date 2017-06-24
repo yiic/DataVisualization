@@ -1,6 +1,23 @@
 Movement of Objects
 -----
-**Intro:**  *userControlMovement.html* is a demo of a object moving along a sin curve.This demo implemented with a **GUI** so that users can do some controls. ([view this demo)](https://yiic.github.io/my-three.js-projects/objectMovement/userControlMovement.html))
+**Intro:**  *userControlMovement.html* is a demo of a object moving along a sin curve.This demo implemented with a **GUI** so that users can do some controls on the movement of a object. ([view this demo)](https://yiic.github.io/my-three.js-projects/objectMovement/userControlMovement.html))
+
+The movement of the object is implemented by updating object positions in the render function. 
+
+```js
+    if(box.position.x < endpoint){
+         
+        box.position.x += updateSpeed;//speed
+        box.position.y = (Math.sin(box.position.x/waveLength)*curveAmplitude);
+
+    }else {
+
+        box.position.x = startpoint;
+        box.position.y = (Math.sin(box.position.x/waveLength)*curveAmplitude);
+    }
+
+```
+
 
 **Sources/Libraries need to be included:**
 - three.js
