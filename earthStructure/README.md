@@ -5,7 +5,7 @@ This demo illustrates the inner structure of the earth in 3D. It using OrbitCont
  ([view this demo](https://yiic.github.io/my-three.js-projects/earthStructure/earthStructure.html))
  
  
-![result picture](pic_result.png)
+[![result picture](pic_result.png)](https://yiic.github.io/my-three.js-projects/earthStructure/earthStructure.html)
  
 ### Encountered Problems and Solutions ###
 Objects created from three.js are not solid. However, layers in earth structure need to be solid. The following picture shows the "hollow sphere".
