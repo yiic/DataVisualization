@@ -8,7 +8,7 @@ This demo illustrates the inner structure of the earth in 3D. It uses OrbitContr
 [![result picture](pic_result.png)](https://yiic.github.io/my-three.js-projects/earthStructure/earthStructure.html)
  
 ### Encountered Problems and Solutions ###
-An Object created from three.js are not solid, in another words, it's more like a "hollow" object. The following picture shows the "hollow sphere".
+An Object created from three.js is not solid, in another words, it's more like a "hollow" object. The following picture shows the "hollow sphere".
  
  
 ![hollow sphere1](pic_hollow1.png)
