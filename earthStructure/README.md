@@ -1,27 +1,27 @@
 3D Earth Structure
 ====
 ### Introduction: ###  
-This demo illustrates the inner structure of the earth in 3D. It using OrbitControls so that users can drag to spin and zoom in/out. It also has GUI for users to switch the axis helper off and on. 
+This demo illustrates the inner structure of the earth in 3D. It uses OrbitControls so that users can drag to spin and zoom in/out. It also has GUI for users to switch the axis helper on and off. 
  ([view this demo](https://yiic.github.io/my-three.js-projects/earthStructure/earthStructure.html))
  
  
 [![result picture](pic_result.png)](https://yiic.github.io/my-three.js-projects/earthStructure/earthStructure.html)
  
 ### Encountered Problems and Solutions ###
-Objects created from three.js are not solid. However, layers in earth structure need to be solid. The following picture shows the "hollow sphere".
+An Object created from three.js are not solid, in another words, it's more like a "hollow" object. The following picture shows the "hollow sphere".
  
  
 ![hollow sphere1](pic_hollow1.png)
  
  
-To create solid spheres, the way [WestLangley](https://stackoverflow.com/questions/37090942/how-to-render-clipped-surfaces-as-solid-objects/37093210#37093210) mentioned does not work in this case. This way only change the texture and reflective effect of "cutting off" surface inside. I think this way only works for single object. If there are multiple nesting objects, when the objects are clipped, the inner object is revealed in a way that still make the objects look like "hollow" objects.  The following picture shows the bad effect using this way. 
+However, the earth as well as layers in the earth need to be solid. To create solid spheres, the way [WestLangley](https://stackoverflow.com/questions/37090942/how-to-render-clipped-surfaces-as-solid-objects/37093210#37093210) mentioned does not work in this case. This way only change the texture and reflective effect of "cutting off" surface inside. I think this way only works for single object. If there are multiple objects nesting with each others, when they are clipped, the inner object is revealed in a way that still make the objects look like "hollow" objects.  The following picture shows the bad effect using in this way. 
 
 
 ![hollow sphere2](pic_hollow2.png)
 
 
 
-Finally, I choose to use the library ["ThreeCSG.js"](https://github.com/chandlerprall/ThreeCSG). It's a CSG plugin for Three.js. The layers of crust, mantle, outer core and inner core are subtracting with each other in order to implement the effect of nesting layers. The outer surface is just a normal "hollow" sphere with an imported world map texture. In order to have the clip effects, the three solid layers crust, mantle, outer core are clipped by a solid cube while the outer surface "world map" is clipped by three planes. The clipIntersection needs to be set true. The following code is for generating a layer of Mantle with thickness of 0.96 using CSG in this demo. 
+I choose to use the library ["ThreeCSG.js"](https://github.com/chandlerprall/ThreeCSG). It's a CSG plugin for Three.js. The layers of crust, mantle, outer core and inner core are subtracting with each other in order to implement the effect of nesting layers. The outer surface is just a normal "hollow" sphere with an imported world map texture. In order to have the clip effects, the three solid layers crust, mantle, outer core are clipped by a solid cube while the outer surface "world map" is clipped by three planes. The clipIntersection needs to be set true. The following code is for generating a layer of Mantle with thickness of 0.96 using CSG in this demo. 
 
 ```js
     var geometry = new THREE.SphereGeometry( 0.96, 24, 24 ); // Take more time to load when increase the last two indexs.
@@ -48,7 +48,7 @@ Adjustments of the radius can decide the thickness of each layer in the earth. T
 
 **Sources/Libraries need to be included:**
 - three.js
+- ThreeCSG.js
 - stats.min.js
 - OrbitControls.js
-- ThreeCSG.js
 - dat.gui.js
