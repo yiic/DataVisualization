@@ -2,10 +2,10 @@
 ====
 ### Introduction: ###  
 This demo illustrates the inner structure of the earth in 3D. It uses OrbitControls so that users can drag to spin and zoom in/out. It also has GUI for users to switch the axis helper on and off. 
- ([view this demo](https://yiic.github.io/my-three.js-projects/earthStructure/earthStructure.html))
+ ([view this demo](https://yiic.github.io/DataVisualization/earthStructure/earthStructure.html))
  
  
-[![result picture](pic_result.png)](https://yiic.github.io/my-three.js-projects/earthStructure/earthStructure.html)
+[![result picture](pic_result.png)](https://yiic.github.io/DataVisualization/earthStructure/earthStructure.html)
  
 ### Encountered Problems and Solutions ###
 An Object created from three.js is not solid, in another words, it's more like a "hollow" object. The following picture shows the "hollow sphere".
